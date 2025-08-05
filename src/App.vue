@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <ToastContainer />
     <!-- Header -->
     <header class="app-header">
       <div class="header-content">
@@ -293,7 +294,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
-import { MyndEcharts, useChartTheme } from '@lib/index'
+import { MyndEcharts, useChartTheme, ToastContainer, useToast } from '@lib/index'
 import type { EChartsOption } from 'echarts'
 import { showcaseCharts, chartCategories, advancedExamples } from './data/demoData'
 import { documentationSections } from './data/documentationData'
@@ -356,6 +357,9 @@ const { currentTheme, setTheme } = useChartTheme({
   defaultTheme: isDarkMode.value ? 'dark' : 'light'
 })
 const themeKey = ref(0)
+
+// Toast notifications
+const toast = useToast()
 
 // Sync app theme with chart theme
 watch(isDarkMode, (newValue) => {
@@ -474,9 +478,9 @@ const formatCode = () => {
 const copyCode = async () => {
   try {
     await navigator.clipboard.writeText(editorContent.value)
-    alert('✅ Copied to clipboard!')
+    toast.success('Copied to clipboard!')
   } catch (err) {
-    alert('Failed to copy to clipboard')
+    toast.danger('Failed to copy to clipboard')
   }
 }
 
@@ -545,9 +549,9 @@ const copyExampleCode = async () => {
   const code = JSON.stringify(selectedExample.value.options, null, 2)
   try {
     await navigator.clipboard.writeText(code)
-    alert('✅ Copied to clipboard!')
+    toast.success('Copied to clipboard!')
   } catch (err) {
-    alert('Failed to copy to clipboard')
+    toast.danger('Failed to copy to clipboard')
   }
 }
 

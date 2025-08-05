@@ -1,7 +1,8 @@
 import type { App } from 'vue'
 import MyndEcharts from './components/MyndEcharts.vue'
+import ToastContainer from './components/ToastContainer.vue'
 
-export { MyndEcharts }
+export { MyndEcharts, ToastContainer }
 
 // Re-export specific items to avoid conflicts
 export * from './types'
@@ -12,5 +13,6 @@ export { debounce, throttle } from './utils'
 export default {
   install(app: App) {
     app.component('MyndEcharts', MyndEcharts)
+    app.component('ToastContainer', ToastContainer)
   }
 }

@@ -188,7 +188,8 @@ const formatCode = () => {
 const validateOption = () => {
   parseAndPreview()
   if (!hasErrors.value && parsedOptions.value) {
-    alert('✅ Option is valid!')
+    // For example app, we'd need to import toast or use a different notification
+    console.log('✅ Option is valid!')
   }
 }
 
@@ -218,7 +219,7 @@ const handleFileImport = (event: Event) => {
       optionText.value = JSON.stringify(parsed, null, 2)
       parseAndPreview()
     } catch (error) {
-      alert('Error reading file: Invalid JSON format')
+      console.error('Error reading file: Invalid JSON format')
     }
   }
   reader.readAsText(file)
@@ -239,9 +240,9 @@ const exportFile = () => {
 const copyToClipboard = async () => {
   try {
     await navigator.clipboard.writeText(optionText.value)
-    alert('✅ Copied to clipboard!')
+    console.log('✅ Copied to clipboard!')
   } catch (err) {
-    alert('Failed to copy to clipboard')
+    console.error('Failed to copy to clipboard')
   }
 }
 
