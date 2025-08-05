@@ -1,11 +1,20 @@
 <template>
-  <div ref="chartRef" :style="computedStyle" :class="computedClass"></div>
+  <div style="width: 100%; height: 100%; position: relative;">
+    <div ref="chartRef" :style="computedStyle" :class="computedClass"></div>
+    <ConfigDialog 
+      v-if="showConfig"
+      v-model="showConfig" 
+      :options="currentOptions"
+      @update:options="handleConfigUpdate"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch, watchEffect, nextTick, type CSSProperties } from 'vue'
 import type { EChartsOption, ECharts, EChartsType } from 'echarts'
 import { useECharts } from '../composables/useECharts'
+import ConfigDialog from './ConfigDialog.vue'
 
 export interface MyndEchartsProps {
   /**
@@ -130,9 +139,12 @@ const emit = defineEmits<{
   globalcursortaken: [params: any]
   rendered: [params: any]
   finished: [params: any]
+  'update:options': [options: EChartsOption]
 }>()
 
 const chartRef = ref<HTMLElement>()
+const showConfig = ref(false)
+const currentOptions = ref<EChartsOption>(props.options || {})
 
 const computedStyle = computed<CSSProperties>(() => ({
   width: '100%',
@@ -212,16 +224,40 @@ const { chartInstance, setOption, resize, dispose, clear, getOption } = useEChar
   }
 })
 
+// Config dialog methods
+const openConfig = () => {
+  // Always use the props.options as the source of truth
+  // because getOption() returns processed options with many internal properties
+  if (props.options) {
+    currentOptions.value = JSON.parse(JSON.stringify(props.options))
+  }
+  showConfig.value = true
+}
+
+const handleConfigUpdate = (newOptions: EChartsOption) => {
+  currentOptions.value = newOptions
+  setOption(newOptions, {
+    notMerge: true,
+    lazyUpdate: false
+  })
+  emit('update:options', newOptions)
+}
+
 // Watch for option changes
 watch(
   () => props.options,
   (newOptions) => {
-    if (newOptions && chartInstance.value) {
-      setOption(newOptions, {
-        notMerge: props.notMerge,
-        lazyUpdate: props.lazyUpdate,
-        silent: props.silent
-      })
+    if (newOptions) {
+      // Update currentOptions whenever props change
+      currentOptions.value = JSON.parse(JSON.stringify(newOptions))
+      
+      if (chartInstance.value) {
+        setOption(newOptions, {
+          notMerge: props.notMerge,
+          lazyUpdate: props.lazyUpdate,
+          silent: props.silent
+        })
+      }
     }
   },
   { deep: true, immediate: true }
@@ -274,6 +310,7 @@ defineExpose({
   resize,
   dispose,
   clear,
+  openConfig,
   getWidth: () => chartInstance.value?.getWidth(),
   getHeight: () => chartInstance.value?.getHeight(),
   getDom: () => chartInstance.value?.getDom(),

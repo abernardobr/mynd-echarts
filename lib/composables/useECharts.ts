@@ -1,4 +1,4 @@
-import { ref, unref, watchEffect, watch, computed, isRef, onUnmounted, type Ref, type ComputedRef } from 'vue'
+import { ref, unref, watchEffect, watch, computed, isRef, onUnmounted, nextTick, type Ref, type ComputedRef } from 'vue'
 import * as echarts from 'echarts'
 import type { EChartsOption, ECharts, SetOptionOpts } from 'echarts'
 import { debounce } from '../utils'
@@ -138,7 +138,16 @@ export function useECharts(
     }
     
     if (chartInstance.value && !chartInstance.value.isDisposed()) {
-      chartInstance.value.setOption(options, opts)
+      try {
+        chartInstance.value.setOption(options, opts)
+      } catch (error) {
+        console.warn('[mynd-echarts] Error setting options:', error)
+        // If there's an error, try to clear and reset
+        if (chartInstance.value) {
+          chartInstance.value.clear()
+          chartInstance.value.setOption(options, { notMerge: true })
+        }
+      }
     }
   }
 
@@ -266,22 +275,29 @@ export function useECharts(
   watch(
     currentTheme,
     (newTheme, oldTheme) => {
-      if (newTheme !== oldTheme && chartInstance.value) {
+      if (newTheme !== oldTheme && chartInstance.value && !chartInstance.value.isDisposed()) {
         const currentOptions = getOption()
         const el = unref(elRef)
-        if (el) {
+        if (el && currentOptions) {
+          // Store the full options before disposal
+          const fullOptions = JSON.parse(JSON.stringify(currentOptions))
+          
           // Dispose and recreate with new theme
           dispose()
-          initChart()
           
-          // Restore options with a slight delay to ensure chart is ready
-          if (currentOptions) {
-            setTimeout(() => {
-              if (chartInstance.value && !chartInstance.value.isDisposed()) {
-                chartInstance.value.setOption(currentOptions, { notMerge: true })
+          // Use nextTick to ensure DOM is updated
+          nextTick(() => {
+            initChart()
+            
+            // Restore options after chart is ready
+            if (chartInstance.value && !chartInstance.value.isDisposed()) {
+              try {
+                chartInstance.value.setOption(fullOptions, { notMerge: true })
+              } catch (error) {
+                console.warn('[mynd-echarts] Error restoring options after theme change:', error)
               }
-            }, 0)
-          }
+            }
+          })
         }
       }
     }

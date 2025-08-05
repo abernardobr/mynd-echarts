@@ -4,13 +4,7 @@
     <header class="app-header">
       <div class="header-content">
         <div class="logo-section">
-          <div class="logo">
-            <span class="material-icons" style="font-size: 3rem;">bar_chart</span>
-          </div>
-          <div>
-            <h1>mynd-echarts</h1>
-            <p>A powerful Vue 3 wrapper for Apache ECharts</p>
-          </div>
+          <img :src="logoImage" alt="mynd-echarts" class="logo-image" />
         </div>
         <nav class="header-nav">
           <button @click="activeView = 'showcase'" :class="{ active: activeView === 'showcase' }">
@@ -24,6 +18,10 @@
           <button @click="activeView = 'examples'" :class="{ active: activeView === 'examples' }">
             <span class="material-icons">library_books</span>
             Examples
+          </button>
+          <button @click="activeView = 'documentation'" :class="{ active: activeView === 'documentation' }">
+            <span class="material-icons">description</span>
+            Docs
           </button>
           <button @click="openGitHub" class="github-btn">
             <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor">
@@ -146,6 +144,10 @@
                   <span class="material-icons">refresh</span>
                   Refresh
                 </button>
+                <button @click="openConfigDialog" :disabled="!validOptions">
+                  <span class="material-icons">settings</span>
+                  Config
+                </button>
                 <button @click="toggleFullscreen" class="fullscreen-toggle">
                   <span class="material-icons">{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</span>
                   {{ isFullscreen ? 'Exit' : 'Fullscreen' }}
@@ -156,11 +158,13 @@
             <div class="chart-preview-container">
               <MyndEcharts
                 v-if="validOptions && previewOptions"
+                ref="previewChartRef"
                 :options="previewOptions"
                 :theme="currentTheme"
                 :key="previewKey"
                 :auto-resize="true"
                 @ready="handleChartReady"
+                @update:options="handleOptionsUpdate"
               />
               <div v-else class="empty-preview">
                 <span class="material-icons empty-icon">insert_chart</span>
@@ -208,6 +212,58 @@
           </div>
         </div>
       </div>
+
+      <!-- Documentation View -->
+      <div v-if="activeView === 'documentation'" class="documentation-view">
+        <div class="documentation-layout">
+          <!-- Sidebar Navigation -->
+          <aside class="documentation-sidebar" :class="{ 'mobile-visible': !isMobileDrawerOpen }">
+            <h3>Documentation</h3>
+            <nav class="documentation-nav">
+              <template v-for="section in documentationSections" :key="section.id">
+                <button 
+                  @click="selectDocSection(section.id); openMobileDrawer()"
+                  :class="{ active: selectedDocSection === section.id }"
+                  class="doc-nav-item"
+                >
+                  <span class="material-icons">{{ section.icon }}</span>
+                  {{ section.title }}
+                </button>
+                
+                <!-- Subsections for API -->
+                <div v-if="section.subsections && selectedDocSection === section.id" class="doc-subnav">
+                  <button
+                    v-for="subsection in section.subsections"
+                    :key="subsection.id"
+                    @click="selectedSubsection = subsection.id; openMobileDrawer()"
+                    :class="{ active: selectedSubsection === subsection.id }"
+                    class="doc-subnav-item"
+                  >
+                    {{ subsection.title }}
+                  </button>
+                </div>
+              </template>
+            </nav>
+          </aside>
+
+          <!-- Mobile Drawer for Content -->
+          <div class="mobile-drawer-overlay" :class="{ open: isMobileDrawerOpen }" @click="closeMobileDrawer"></div>
+          
+          <!-- Content Area -->
+          <main class="documentation-content" :class="{ 'drawer-open': isMobileDrawerOpen }">
+            <div class="mobile-drawer-header">
+              <button @click="closeMobileDrawer" class="drawer-close-btn">
+                <span class="material-icons">arrow_back</span>
+                Back
+              </button>
+              <h2>{{ currentDocSection?.title }}</h2>
+            </div>
+            <div class="doc-content-wrapper">
+              <div class="markdown-content" ref="markdownContentRef"></div>
+            </div>
+          </main>
+        </div>
+      </div>
     </main>
 
     <!-- Code Modal -->
@@ -236,19 +292,23 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import { MyndEcharts, useChartTheme } from '@lib/index'
 import type { EChartsOption } from 'echarts'
 import { showcaseCharts, chartCategories, advancedExamples } from './data/demoData'
+import { documentationSections } from './data/documentationData'
+import { apiDocumentation } from './data/apiDocumentation'
 import { useAppTheme } from './composables/useAppTheme'
+import { parseMarkdown, mountCodeBlocks, unmountCodeBlocks } from './utils/markdown'
 
 // State
-const activeView = ref<'showcase' | 'playground' | 'examples'>('showcase')
+const activeView = ref<'showcase' | 'playground' | 'examples' | 'documentation'>('showcase')
 const selectedCategory = ref('all')
 const selectedChart = ref<any>(null)
 const selectedTemplate = ref('')
 const isFullscreen = ref(false)
 const previewPanelRef = ref<HTMLElement>()
+const previewChartRef = ref<any>()
 const editorContent = ref(JSON.stringify({
   title: {
     text: 'Sample Chart',
@@ -285,6 +345,10 @@ const validOptions = ref(false)
 const previewKey = ref(0)
 const showCodeModal = ref(false)
 const selectedExample = ref<any>(null)
+const selectedDocSection = ref('getting-started')
+const selectedSubsection = ref<string | null>(null)
+const isMobileDrawerOpen = ref(false)
+const markdownContentRef = ref<HTMLElement>()
 
 // Theme management
 const { isDarkMode, toggleTheme: toggleAppTheme } = useAppTheme()
@@ -300,6 +364,9 @@ watch(isDarkMode, (newValue) => {
   themeKey.value++
   previewKey.value++
 })
+
+// Computed logo based on theme
+const logoImage = computed(() => isDarkMode.value ? '/logo_white.png' : '/logo.png')
 
 // Categories
 const categories = [
@@ -321,6 +388,40 @@ const filteredCharts = computed(() => {
     return showcaseCharts
   }
   return showcaseCharts.filter(chart => chart.category === selectedCategory.value)
+})
+
+const renderedDocContent = computed(() => {
+  const section = documentationSections.find(s => s.id === selectedDocSection.value)
+  if (!section) return ''
+  
+  // Handle API documentation specially
+  if (section.id === 'component-api' && selectedSubsection.value) {
+    const apiContent = apiDocumentation[selectedSubsection.value as keyof typeof apiDocumentation]
+    return parseMarkdown(apiContent || '')
+  }
+  
+  return parseMarkdown(section.content)
+})
+
+
+// Watch for content changes and update DOM
+watch([renderedDocContent, markdownContentRef], ([content, ref]) => {
+  if (ref && content) {
+    // Unmount any existing code blocks
+    unmountCodeBlocks(ref)
+    
+    // Set new content
+    ref.innerHTML = content
+    
+    // Mount code block components
+    nextTick(() => {
+      mountCodeBlocks(ref)
+    })
+  }
+}, { immediate: true, flush: 'post' })
+
+const currentDocSection = computed(() => {
+  return documentationSections.find(s => s.id === selectedDocSection.value)
 })
 
 // Methods
@@ -415,6 +516,22 @@ const handleChartReady = (instance: any) => {
   }, 100)
 }
 
+const openConfigDialog = () => {
+  if (previewChartRef.value) {
+    previewChartRef.value.openConfig()
+  }
+}
+
+const handleOptionsUpdate = (newOptions: EChartsOption) => {
+  if (newOptions) {
+    // Update the editor content with the new options
+    editorContent.value = JSON.stringify(newOptions, null, 2)
+    previewOptions.value = newOptions
+    validOptions.value = true
+    editorError.value = ''
+  }
+}
+
 const viewCode = (example: any) => {
   selectedExample.value = example
   showCodeModal.value = true
@@ -457,6 +574,28 @@ const openGitHub = () => {
   window.open('https://github.com/yourusername/mynd-echarts', '_blank')
 }
 
+const selectDocSection = (sectionId: string) => {
+  selectedDocSection.value = sectionId
+  const section = documentationSections.find(s => s.id === sectionId)
+  if (section?.subsections) {
+    selectedSubsection.value = section.subsections[0].id
+  } else {
+    selectedSubsection.value = null
+  }
+}
+
+const openMobileDrawer = () => {
+  if (window.innerWidth <= 1024) {
+    isMobileDrawerOpen.value = true
+    document.body.style.overflow = 'hidden'
+  }
+}
+
+const closeMobileDrawer = () => {
+  isMobileDrawerOpen.value = false
+  document.body.style.overflow = ''
+}
+
 const toggleFullscreen = async () => {
   if (!document.fullscreenElement) {
     if (previewPanelRef.value) {
@@ -487,6 +626,7 @@ watch(() => currentTheme.value, () => {
   themeKey.value++
 })
 
+
 // Initialize preview on mount
 onMounted(() => {
   updatePreview()
@@ -496,6 +636,12 @@ onMounted(() => {
 // Cleanup
 onUnmounted(() => {
   document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  // Reset body overflow if drawer was open
+  document.body.style.overflow = ''
+  // Unmount code blocks if documentation view
+  if (markdownContentRef.value) {
+    unmountCodeBlocks(markdownContentRef.value)
+  }
 })
 </script>
 
@@ -564,25 +710,12 @@ onUnmounted(() => {
 .logo-section {
   display: flex;
   align-items: center;
-  gap: 1rem;
 }
 
-.logo {
-  font-size: 3rem;
-  line-height: 1;
-}
-
-.logo-section h1 {
-  margin: 0;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.logo-section p {
-  margin: 0.25rem 0 0 0;
-  font-size: 0.875rem;
-  color: var(--text-secondary);
+.logo-image {
+  height: 50px;
+  width: auto;
+  object-fit: contain;
 }
 
 .header-nav {
@@ -768,10 +901,10 @@ onUnmounted(() => {
 
 .playground-layout {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
   gap: 1.5rem;
   height: calc(100vh - 300px);
-  min-height: 600px;
+  min-height: 800px;
 }
 
 .editor-panel,
@@ -887,7 +1020,7 @@ onUnmounted(() => {
   flex: 1;
   padding: 1rem;
   position: relative;
-  min-height: 400px;
+  min-height: 300px;
   display: flex;
   flex-direction: column;
 }
@@ -896,7 +1029,8 @@ onUnmounted(() => {
 .chart-preview-container > div:first-child {
   flex: 1;
   width: 100%;
-  min-height: 400px;
+  height: 100%;
+  min-height: 300px;
 }
 
 .empty-preview {
@@ -918,6 +1052,8 @@ onUnmounted(() => {
 .preview-panel:fullscreen {
   background: var(--bg-primary);
   padding: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .preview-panel:fullscreen .preview-toolbar {
@@ -926,10 +1062,13 @@ onUnmounted(() => {
   z-index: 10;
   background: var(--bg-primary);
   box-shadow: var(--shadow);
+  flex-shrink: 0;
 }
 
 .preview-panel:fullscreen .chart-preview-container {
+  flex: 1;
   height: calc(100vh - 60px);
+  padding: 1rem;
 }
 
 .fullscreen-toggle {
@@ -1131,13 +1270,14 @@ onUnmounted(() => {
 /* Responsive */
 @media (max-width: 1024px) {
   .playground-layout {
-    grid-template-columns: 1fr;
-    height: auto;
+    grid-template-rows: 1fr 1fr;
+    height: calc(100vh - 250px);
+    min-height: 700px;
   }
   
   .editor-panel,
   .preview-panel {
-    min-height: 500px;
+    min-height: 350px;
   }
 }
 
@@ -1155,11 +1295,407 @@ onUnmounted(() => {
   .app-main {
     padding: 1rem;
   }
+  
+  .playground-layout {
+    grid-template-rows: 1fr 1fr;
+    height: calc(100vh - 200px);
+    min-height: 600px;
+    gap: 1rem;
+  }
+  
+  .editor-panel,
+  .preview-panel {
+    min-height: 300px;
+  }
+  
+  .playground-header {
+    margin-bottom: 1.5rem;
+  }
+  
+  .playground-header h2 {
+    font-size: 1.5rem;
+  }
+  
+  .playground-header p {
+    font-size: 1rem;
+  }
 }
 
 /* Material Icons global styles */
 .material-icons {
   vertical-align: middle;
   line-height: 1;
+}
+
+/* Documentation Styles */
+.documentation-view {
+  height: calc(100vh - 120px);
+  overflow: hidden;
+}
+
+.documentation-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  height: 100%;
+  gap: 0;
+}
+
+.documentation-sidebar {
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.documentation-sidebar h3 {
+  margin: 0 0 1.5rem 0;
+  font-size: 1.25rem;
+  color: var(--text-primary);
+}
+
+.documentation-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.doc-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-align: left;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.doc-nav-item .material-icons {
+  font-size: 1.25rem;
+  opacity: 0.7;
+}
+
+.doc-nav-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.doc-nav-item.active {
+  background: #4299e1;
+  color: white;
+}
+
+.doc-nav-item.active .material-icons {
+  opacity: 1;
+}
+
+/* Subsection navigation */
+.doc-subnav {
+  margin-left: 2rem;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.doc-subnav-item {
+  padding: 0.5rem 1rem;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 400;
+  text-align: left;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-left: 2px solid transparent;
+}
+
+.doc-subnav-item:hover {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+}
+
+.doc-subnav-item.active {
+  background: var(--bg-tertiary);
+  color: #4299e1;
+  border-left-color: #4299e1;
+  font-weight: 500;
+}
+
+.documentation-content {
+  background: var(--bg-secondary);
+  overflow-y: auto;
+  padding: 3rem;
+}
+
+.doc-content-wrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* Markdown Content Styles */
+.markdown-content {
+  color: var(--text-primary);
+  line-height: 1.7;
+}
+
+.markdown-content h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin: 0 0 1.5rem 0;
+  color: var(--text-primary);
+  border-bottom: 2px solid var(--border-color);
+  padding-bottom: 0.75rem;
+}
+
+.markdown-content h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  margin: 2.5rem 0 1rem 0;
+  color: var(--text-primary);
+}
+
+.markdown-content h3 {
+  font-size: 1.375rem;
+  font-weight: 600;
+  margin: 2rem 0 0.75rem 0;
+  color: var(--text-primary);
+}
+
+.markdown-content p {
+  margin: 0 0 1.25rem 0;
+  color: var(--text-secondary);
+}
+
+.markdown-content code {
+  background: var(--bg-tertiary);
+  padding: 0.125rem 0.375rem;
+  border-radius: 4px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.875rem;
+  color: #4299e1;
+}
+
+.markdown-content pre {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+}
+
+.markdown-content pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.markdown-content ul,
+.markdown-content ol {
+  margin: 0 0 1.25rem 0;
+  padding-left: 2rem;
+  color: var(--text-secondary);
+}
+
+.markdown-content li {
+  margin: 0.5rem 0;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.markdown-content th,
+.markdown-content td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.markdown-content th {
+  background: var(--bg-tertiary);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.markdown-content tr:last-child td {
+  border-bottom: none;
+}
+
+/* Responsive Documentation */
+@media (max-width: 1024px) {
+  .documentation-layout {
+    grid-template-columns: 1fr;
+    position: relative;
+  }
+  
+  .documentation-sidebar {
+    width: 100%;
+    height: 100%;
+    display: block;
+    position: relative;
+    border-right: none;
+  }
+  
+  .documentation-sidebar.mobile-visible {
+    display: block;
+  }
+  
+  /* Mobile drawer overlay */
+  .mobile-drawer-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  
+  .mobile-drawer-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  
+  /* Content as drawer */
+  .documentation-content {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 90%;
+    max-width: 600px;
+    height: 100vh;
+    background: var(--bg-secondary);
+    z-index: 1000;
+    transition: right 0.3s ease;
+    overflow-y: auto;
+    padding: 0;
+    box-shadow: -2px 0 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .documentation-content.drawer-open {
+    right: 0;
+  }
+  
+  /* Mobile drawer header */
+  .mobile-drawer-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--bg-primary);
+    border-bottom: 1px solid var(--border-color);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  .mobile-drawer-header h2 {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--text-primary);
+    flex: 1;
+  }
+  
+  .drawer-close-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .drawer-close-btn:hover {
+    background: var(--bg-tertiary);
+    border-color: var(--border-color);
+  }
+  
+  .drawer-close-btn .material-icons {
+    font-size: 1.125rem;
+  }
+  
+  .doc-content-wrapper {
+    padding: 2rem 1.5rem;
+  }
+}
+
+/* Hide drawer header on desktop */
+@media (min-width: 1025px) {
+  .mobile-drawer-header {
+    display: none;
+  }
+  
+  .mobile-drawer-overlay {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .documentation-content {
+    width: 95%;
+    max-width: none;
+  }
+  
+  .doc-content-wrapper {
+    padding: 1.5rem 1rem;
+  }
+  
+  .markdown-content h1 {
+    font-size: 2rem;
+  }
+  
+  .markdown-content h2 {
+    font-size: 1.5rem;
+  }
+  
+  .markdown-content h3 {
+    font-size: 1.25rem;
+  }
+  
+  .documentation-sidebar h3 {
+    font-size: 1.125rem;
+    margin-bottom: 1rem;
+  }
+  
+  .doc-nav-item {
+    font-size: 0.875rem;
+    padding: 0.625rem 0.875rem;
+  }
+  
+  .doc-nav-item .material-icons {
+    font-size: 1.125rem;
+  }
 }
 </style>
