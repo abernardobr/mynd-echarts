@@ -3,8 +3,8 @@
     <div v-if="isOpen" class="config-dialog-overlay" @click="handleOverlayClick">
       <div class="config-dialog" @click.stop>
         <div class="config-header">
-          <h2>Chart Configuration</h2>
-          <button class="close-btn" @click="close">
+          <h2>{{ t('configDialog.title') }}</h2>
+          <button class="close-btn" @click="close" :title="t('configDialog.buttons.close')">
             <span class="material-icons">close</span>
           </button>
         </div>
@@ -14,35 +14,39 @@
           <div class="accordion-section">
             <button class="accordion-header" @click="toggleSection('title')" :class="{ active: expandedSections.title }">
               <span class="material-icons">{{ expandedSections.title ? 'expand_less' : 'expand_more' }}</span>
-              <span>Title & Subtitle</span>
+              <span>{{ t('configDialog.sections.title') }}</span>
             </button>
             <div v-if="expandedSections.title" class="accordion-content">
               <BaseInput
                 v-model="localOptions.title.text"
-                label="Title Text"
-                placeholder="Chart title"
+                :label="t('configDialog.fields.titleText')"
+                :placeholder="t('configDialog.placeholders.chartTitle')"
                 @input="updateOptions"
               />
               <BaseInput
                 v-model="localOptions.title.subtext"
-                label="Subtitle"
-                placeholder="Chart subtitle"
+                :label="t('configDialog.fields.subtitle')"
+                :placeholder="t('configDialog.placeholders.chartSubtitle')"
                 @input="updateOptions"
               />
               <BaseSelect
                 v-model="localOptions.title.left"
-                label="Position"
-                :options="['left', 'center', 'right']"
+                :label="t('configDialog.fields.position')"
+                :options="[
+                  { label: t('configDialog.positions.left'), value: 'left' },
+                  { label: t('configDialog.positions.center'), value: 'center' },
+                  { label: t('configDialog.positions.right'), value: 'right' }
+                ]"
                 @change="updateOptions"
               />
               <div class="form-group color-group">
-                <label class="color-label">Text Style Color</label>
+                <label class="color-label">{{ t('configDialog.fields.textStyleColor') }}</label>
                 <input type="color" v-model="titleTextColor" @input="updateOptions" class="color-picker">
               </div>
               <BaseInput
                 v-model="titleFontSize"
                 type="number"
-                label="Font Size"
+                :label="t('configDialog.fields.fontSize')"
                 :min="10"
                 :max="48"
                 @input="updateOptions"
@@ -55,24 +59,31 @@
           <div class="accordion-section">
             <button class="accordion-header" @click="toggleSection('legend')" :class="{ active: expandedSections.legend }">
               <span class="material-icons">{{ expandedSections.legend ? 'expand_less' : 'expand_more' }}</span>
-              <span>Legend</span>
+              <span>{{ t('configDialog.sections.legend') }}</span>
             </button>
             <div v-if="expandedSections.legend" class="accordion-content">
               <BaseCheckbox
                 v-model="localOptions.legend.show"
-                label="Show Legend"
+                :label="t('configDialog.fields.showLegend')"
                 @change="updateOptions"
               />
               <BaseSelect
                 v-model="localOptions.legend.left"
-                label="Position"
-                :options="['left', 'center', 'right']"
+                :label="t('configDialog.fields.position')"
+                :options="[
+                  { label: t('configDialog.positions.left'), value: 'left' },
+                  { label: t('configDialog.positions.center'), value: 'center' },
+                  { label: t('configDialog.positions.right'), value: 'right' }
+                ]"
                 @change="updateOptions"
               />
               <BaseSelect
                 v-model="legendOrient"
-                label="Orientation"
-                :options="['horizontal', 'vertical']"
+                :label="t('configDialog.fields.orientation')"
+                :options="[
+                  { label: t('configDialog.orientations.horizontal'), value: 'horizontal' },
+                  { label: t('configDialog.orientations.vertical'), value: 'vertical' }
+                ]"
                 @change="updateOptions"
               />
             </div>
@@ -82,26 +93,30 @@
           <div class="accordion-section">
             <button class="accordion-header" @click="toggleSection('tooltip')" :class="{ active: expandedSections.tooltip }">
               <span class="material-icons">{{ expandedSections.tooltip ? 'expand_less' : 'expand_more' }}</span>
-              <span>Tooltip</span>
+              <span>{{ t('configDialog.sections.tooltip') }}</span>
             </button>
             <div v-if="expandedSections.tooltip" class="accordion-content">
               <BaseCheckbox
                 v-model="localOptions.tooltip.show"
-                label="Show Tooltip"
+                :label="t('configDialog.fields.showTooltip')"
                 @change="updateOptions"
               />
               <BaseSelect
                 v-model="localOptions.tooltip.trigger"
-                label="Trigger"
-                :options="['item', 'axis', 'none']"
+                :label="t('configDialog.fields.trigger')"
+                :options="[
+                  { label: t('configDialog.triggerTypes.item'), value: 'item' },
+                  { label: t('configDialog.triggerTypes.axis'), value: 'axis' },
+                  { label: t('configDialog.triggerTypes.none'), value: 'none' }
+                ]"
                 @change="updateOptions"
               />
               <BaseInput
                 v-model="localOptions.tooltip.formatter"
                 type="textarea"
-                label="Formatter"
-                placeholder="{b}: {c}"
-                help-text="Use placeholders: {a} series name, {b} data name, {c} data value, {d} percentage. Example: '{b}: {c} ({d}%)'"
+                :label="t('configDialog.fields.formatter')"
+                :placeholder="t('configDialog.placeholders.formatterExample')"
+                :help-text="t('configDialog.helpTexts.formatter')"
                 :rows="3"
                 @input="updateOptions"
               />
@@ -112,24 +127,27 @@
           <div class="accordion-section">
             <button class="accordion-header" @click="toggleSection('toolbox')" :class="{ active: expandedSections.toolbox }">
               <span class="material-icons">{{ expandedSections.toolbox ? 'expand_less' : 'expand_more' }}</span>
-              <span>Toolbox</span>
+              <span>{{ t('configDialog.sections.toolbox') }}</span>
             </button>
             <div v-if="expandedSections.toolbox" class="accordion-content">
               <BaseCheckbox
                 v-model="localOptions.toolbox.show"
-                label="Show Toolbox"
+                :label="t('configDialog.fields.showToolbox')"
                 @change="updateOptions"
               />
               <BaseSelect
                 v-model="localOptions.toolbox.orient"
-                label="Orientation"
-                :options="['horizontal', 'vertical']"
+                :label="t('configDialog.fields.orientation')"
+                :options="[
+                  { label: t('configDialog.orientations.horizontal'), value: 'horizontal' },
+                  { label: t('configDialog.orientations.vertical'), value: 'vertical' }
+                ]"
                 @change="updateOptions"
               />
               <BaseInput
                 v-model="localOptions.toolbox.itemSize"
                 type="number"
-                label="Icon Size"
+                :label="t('configDialog.fields.iconSize')"
                 :min="10"
                 :max="30"
                 @input="updateOptions"
@@ -137,104 +155,108 @@
               <BaseInput
                 v-model="localOptions.toolbox.itemGap"
                 type="number"
-                label="Item Gap"
+                :label="t('configDialog.fields.itemGap')"
                 :min="0"
                 :max="30"
                 @input="updateOptions"
               />
               <BaseCheckbox
                 v-model="localOptions.toolbox.showTitle"
-                label="Show Title on Hover"
+                :label="t('configDialog.fields.showTitleOnHover')"
                 @change="updateOptions"
               />
               
               <div class="feature-section">
-                <h4 class="section-subtitle">Features</h4>
+                <h4 class="section-subtitle">{{ t('configDialog.fields.features') }}</h4>
                 
                 <!-- Save as Image -->
                 <div class="feature-group">
-                  <h5 class="feature-title">Save as Image</h5>
+                  <h5 class="feature-title">{{ t('configDialog.features.saveAsImage') }}</h5>
                   <BaseCheckbox
                     v-model="toolboxSaveAsImageShow"
-                    label="Enable"
+                    :label="t('configDialog.fields.enable')"
                     @change="updateOptions"
                   />
                   <BaseSelect
                     v-model="toolboxSaveAsImageType"
-                    label="Image Type"
-                    :options="['png', 'jpeg', 'svg']"
+                    :label="t('configDialog.fields.imageType')"
+                    :options="[
+                  { label: 'PNG', value: 'png' },
+                  { label: 'JPEG', value: 'jpeg' },
+                  { label: 'SVG', value: 'svg' }
+                ]"
                     @change="updateOptions"
                   />
                   <BaseInput
                     v-model="toolboxSaveAsImageName"
-                    label="Filename"
-                    placeholder="chart"
+                    :label="t('configDialog.fields.filename')"
+                    :placeholder="t('configDialog.placeholders.defaultFilename')"
                     @input="updateOptions"
                   />
                 </div>
                 
                 <!-- Restore -->
                 <div class="feature-group">
-                  <h5 class="feature-title">Restore</h5>
+                  <h5 class="feature-title">{{ t('configDialog.features.restore') }}</h5>
                   <BaseCheckbox
                     v-model="toolboxRestoreShow"
-                    label="Enable"
+                    :label="t('configDialog.fields.enable')"
                     @change="updateOptions"
                   />
                 </div>
                 
                 <!-- Data View -->
                 <div class="feature-group">
-                  <h5 class="feature-title">Data View</h5>
+                  <h5 class="feature-title">{{ t('configDialog.features.dataView') }}</h5>
                   <BaseCheckbox
                     v-model="toolboxDataViewShow"
-                    label="Enable"
+                    :label="t('configDialog.fields.enable')"
                     @change="updateOptions"
                   />
                   <BaseCheckbox
                     v-model="toolboxDataViewReadOnly"
-                    label="Read Only"
+                    :label="t('configDialog.fields.readOnly')"
                     @change="updateOptions"
                   />
                 </div>
                 
                 <!-- Data Zoom -->
                 <div class="feature-group">
-                  <h5 class="feature-title">Data Zoom</h5>
+                  <h5 class="feature-title">{{ t('configDialog.features.dataZoom') }}</h5>
                   <BaseCheckbox
                     v-model="toolboxDataZoomShow"
-                    label="Enable"
+                    :label="t('configDialog.fields.enable')"
                     @change="updateOptions"
                   />
                 </div>
                 
                 <!-- Magic Type -->
                 <div class="feature-group">
-                  <h5 class="feature-title">Magic Type (Chart Switcher)</h5>
+                  <h5 class="feature-title">{{ t('configDialog.features.magicType') }}</h5>
                   <BaseCheckbox
                     v-model="toolboxMagicTypeShow"
-                    label="Enable"
+                    :label="t('configDialog.fields.enable')"
                     @change="updateOptions"
                   />
                   <div class="checkbox-group">
                     <BaseCheckbox
                       v-model="toolboxMagicTypeLine"
-                      label="Line Chart"
+                      :label="t('configDialog.chartTypes.line')"
                       @change="updateToolboxMagicTypes"
                     />
                     <BaseCheckbox
                       v-model="toolboxMagicTypeBar"
-                      label="Bar Chart"
+                      :label="t('configDialog.chartTypes.bar')"
                       @change="updateToolboxMagicTypes"
                     />
                     <BaseCheckbox
                       v-model="toolboxMagicTypeStack"
-                      label="Stack"
+                      :label="t('configDialog.chartTypes.stack')"
                       @change="updateToolboxMagicTypes"
                     />
                     <BaseCheckbox
                       v-model="toolboxMagicTypeTiled"
-                      label="Tiled"
+                      :label="t('configDialog.chartTypes.tiled')"
                       @change="updateToolboxMagicTypes"
                     />
                   </div>
@@ -247,36 +269,36 @@
           <div class="accordion-section">
             <button class="accordion-header" @click="toggleSection('grid')" :class="{ active: expandedSections.grid }">
               <span class="material-icons">{{ expandedSections.grid ? 'expand_less' : 'expand_more' }}</span>
-              <span>Grid & Layout</span>
+              <span>{{ t('configDialog.sections.grid') }}</span>
             </button>
             <div v-if="expandedSections.grid" class="accordion-content">
               <BaseInput
                 v-model="localOptions.grid.left"
-                label="Left Margin"
-                placeholder="10%"
+                :label="t('configDialog.fields.leftMargin')"
+                :placeholder="t('configDialog.placeholders.marginExample')"
                 @input="updateOptions"
               />
               <BaseInput
                 v-model="localOptions.grid.right"
-                label="Right Margin"
-                placeholder="10%"
+                :label="t('configDialog.fields.rightMargin')"
+                :placeholder="t('configDialog.placeholders.marginExample')"
                 @input="updateOptions"
               />
               <BaseInput
                 v-model="localOptions.grid.top"
-                label="Top Margin"
-                placeholder="60"
+                :label="t('configDialog.fields.topMargin')"
+                :placeholder="t('configDialog.placeholders.pixelValue')"
                 @input="updateOptions"
               />
               <BaseInput
                 v-model="localOptions.grid.bottom"
-                label="Bottom Margin"
-                placeholder="60"
+                :label="t('configDialog.fields.bottomMargin')"
+                :placeholder="t('configDialog.placeholders.pixelValue')"
                 @input="updateOptions"
               />
               <BaseCheckbox
                 v-model="localOptions.grid.containLabel"
-                label="Contain Label"
+                :label="t('configDialog.fields.containLabel')"
                 @change="updateOptions"
               />
             </div>
@@ -286,34 +308,34 @@
           <div class="accordion-section" v-if="hasAxis">
             <button class="accordion-header" @click="toggleSection('xAxis')" :class="{ active: expandedSections.xAxis }">
               <span class="material-icons">{{ expandedSections.xAxis ? 'expand_less' : 'expand_more' }}</span>
-              <span>X Axis</span>
+              <span>{{ t('configDialog.sections.xAxis') }}</span>
             </button>
             <div v-if="expandedSections.xAxis" class="accordion-content">
               <BaseInput
                 v-model="localOptions.xAxis.name"
-                label="Name"
-                placeholder="X Axis Name"
+                :label="t('configDialog.fields.name')"
+                :placeholder="t('configDialog.placeholders.xAxisName')"
                 @input="updateOptions"
               />
               <BaseSelect
                 v-model="localOptions.xAxis.type"
-                label="Type"
+                :label="t('configDialog.fields.type')"
                 :options="[
-                  { label: 'Value', value: 'value' },
-                  { label: 'Category', value: 'category' },
-                  { label: 'Time', value: 'time' },
-                  { label: 'Log', value: 'log' }
+                  { label: t('configDialog.axisTypes.value'), value: 'value' },
+                  { label: t('configDialog.axisTypes.category'), value: 'category' },
+                  { label: t('configDialog.axisTypes.time'), value: 'time' },
+                  { label: t('configDialog.axisTypes.log'), value: 'log' }
                 ]"
                 @change="updateOptions"
               />
               <BaseCheckbox
                 v-model="xAxisLineShow"
-                label="Show Axis Line"
+                :label="t('configDialog.fields.showAxisLine')"
                 @change="updateOptions"
               />
               <BaseCheckbox
                 v-model="xAxisSplitLineShow"
-                label="Show Split Line"
+                :label="t('configDialog.fields.showSplitLine')"
                 @change="updateOptions"
               />
             </div>
@@ -323,34 +345,34 @@
           <div class="accordion-section" v-if="hasAxis">
             <button class="accordion-header" @click="toggleSection('yAxis')" :class="{ active: expandedSections.yAxis }">
               <span class="material-icons">{{ expandedSections.yAxis ? 'expand_less' : 'expand_more' }}</span>
-              <span>Y Axis</span>
+              <span>{{ t('configDialog.sections.yAxis') }}</span>
             </button>
             <div v-if="expandedSections.yAxis" class="accordion-content">
               <BaseInput
                 v-model="localOptions.yAxis.name"
-                label="Name"
-                placeholder="Y Axis Name"
+                :label="t('configDialog.fields.name')"
+                :placeholder="t('configDialog.placeholders.yAxisName')"
                 @input="updateOptions"
               />
               <BaseSelect
                 v-model="localOptions.yAxis.type"
-                label="Type"
+                :label="t('configDialog.fields.type')"
                 :options="[
-                  { label: 'Value', value: 'value' },
-                  { label: 'Category', value: 'category' },
-                  { label: 'Time', value: 'time' },
-                  { label: 'Log', value: 'log' }
+                  { label: t('configDialog.axisTypes.value'), value: 'value' },
+                  { label: t('configDialog.axisTypes.category'), value: 'category' },
+                  { label: t('configDialog.axisTypes.time'), value: 'time' },
+                  { label: t('configDialog.axisTypes.log'), value: 'log' }
                 ]"
                 @change="updateOptions"
               />
               <BaseCheckbox
                 v-model="yAxisLineShow"
-                label="Show Axis Line"
+                :label="t('configDialog.fields.showAxisLine')"
                 @change="updateOptions"
               />
               <BaseCheckbox
                 v-model="yAxisSplitLineShow"
-                label="Show Split Line"
+                :label="t('configDialog.fields.showSplitLine')"
                 @change="updateOptions"
               />
             </div>
@@ -360,11 +382,11 @@
           <div class="accordion-section">
             <button class="accordion-header" @click="toggleSection('colors')" :class="{ active: expandedSections.colors }">
               <span class="material-icons">{{ expandedSections.colors ? 'expand_less' : 'expand_more' }}</span>
-              <span>Colors</span>
+              <span>{{ t('configDialog.sections.colors') }}</span>
             </button>
             <div v-if="expandedSections.colors" class="accordion-content">
               <div>
-                <h4 class="section-subtitle">Color Palette</h4>
+                <h4 class="section-subtitle">{{ t('configDialog.fields.colorPalette') }}</h4>
                 <div class="color-palette">
                   <div v-for="(color, index) in colorPalette" :key="index" class="color-item">
                     <input type="color" :value="color" @input="updateColor(index, $event)" @change="updateOptions" class="color-picker">
@@ -374,12 +396,12 @@
                   </div>
                   <button @click="addColor" class="add-color">
                     <span class="material-icons">add</span>
-                    Add Color
+                    {{ t('configDialog.buttons.addColor') }}
                   </button>
                 </div>
               </div>
               <div class="form-group color-group">
-                <label class="color-label">Background Color</label>
+                <label class="color-label">{{ t('configDialog.fields.backgroundColor') }}</label>
                 <input type="color" v-model="backgroundColor" @input="updateOptions" class="color-picker">
               </div>
             </div>
@@ -389,18 +411,18 @@
           <div class="accordion-section">
             <button class="accordion-header" @click="toggleSection('animation')" :class="{ active: expandedSections.animation }">
               <span class="material-icons">{{ expandedSections.animation ? 'expand_less' : 'expand_more' }}</span>
-              <span>Animation</span>
+              <span>{{ t('configDialog.sections.animation') }}</span>
             </button>
             <div v-if="expandedSections.animation" class="accordion-content">
               <BaseCheckbox
                 v-model="localOptions.animation"
-                label="Enable Animation"
+                :label="t('configDialog.fields.enableAnimation')"
                 @change="updateOptions"
               />
               <BaseInput
                 v-model="localOptions.animationDuration"
                 type="number"
-                label="Animation Duration (ms)"
+                :label="t('configDialog.fields.animationDuration')"
                 :min="0"
                 :max="5000"
                 :step="100"
@@ -408,24 +430,43 @@
               />
               <BaseSelect
                 v-model="localOptions.animationEasing"
-                label="Animation Easing"
+                :label="t('configDialog.fields.animationEasing')"
                 :options="[
-                  { label: 'Linear', value: 'linear' },
-                  { label: 'Cubic In', value: 'cubicIn' },
-                  { label: 'Cubic Out', value: 'cubicOut' },
-                  { label: 'Cubic In Out', value: 'cubicInOut' },
-                  { label: 'Elastic Out', value: 'elasticOut' },
-                  { label: 'Bounce Out', value: 'bounceOut' }
+                  { label: t('configDialog.easingTypes.linear'), value: 'linear' },
+                  { label: t('configDialog.easingTypes.cubicIn'), value: 'cubicIn' },
+                  { label: t('configDialog.easingTypes.cubicOut'), value: 'cubicOut' },
+                  { label: t('configDialog.easingTypes.cubicInOut'), value: 'cubicInOut' },
+                  { label: t('configDialog.easingTypes.elasticOut'), value: 'elasticOut' },
+                  { label: t('configDialog.easingTypes.bounceOut'), value: 'bounceOut' }
                 ]"
                 @change="updateOptions"
               />
             </div>
           </div>
+
+          <!-- Language Section -->
+          <div class="accordion-section">
+            <button class="accordion-header" @click="toggleSection('language')" :class="{ active: expandedSections.language }">
+              <span class="material-icons">{{ expandedSections.language ? 'expand_less' : 'expand_more' }}</span>
+              <span>{{ t('configDialog.sections.language') }}</span>
+            </button>
+            <div v-if="expandedSections.language" class="accordion-content">
+              <BaseSelect
+                v-model="currentLocale"
+                :label="t('configDialog.fields.selectLanguage')"
+                :options="availableLocales"
+                @change="handleLocaleChange"
+              />
+              <div class="help-text" style="margin-top: 0.5rem;">
+                {{ t('configDialog.helpTexts.languageChange') }}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="config-footer">
-          <button class="btn-secondary" @click="resetOptions">Reset</button>
-          <button class="btn-primary" @click="applyAndClose">Apply</button>
+          <button class="btn-secondary" @click="resetOptions">{{ t('configDialog.buttons.reset') }}</button>
+          <button class="btn-primary" @click="applyAndClose">{{ t('configDialog.buttons.apply') }}</button>
         </div>
       </div>
     </div>
@@ -438,6 +479,7 @@ import type { EChartsOption } from 'echarts'
 import BaseInput from './BaseInput.vue'
 import BaseSelect from './BaseSelect.vue'
 import BaseCheckbox from './BaseCheckbox.vue'
+import { useTranslation, useLocale } from '../composables/useLocale'
 
 interface ConfigDialogProps {
   modelValue: boolean
@@ -452,7 +494,31 @@ const props = withDefaults(defineProps<ConfigDialogProps>(), {
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
   'update:options': [options: EChartsOption]
+  'update:locale': [locale: string]
 }>()
+
+// Localization
+const { t } = useTranslation()
+const { locale: currentLocale } = useLocale()
+
+// Available locales for the dropdown
+const availableLocales = computed(() => [
+  { value: 'en', label: 'English' },
+  { value: 'zh-CN', label: '中文 (简体)' },
+  { value: 'es', label: 'Español' },
+  { value: 'fr', label: 'Français' },
+  { value: 'pt-BR', label: 'Português (Brasil)' },
+  { value: 'de', label: 'Deutsch' },
+  { value: 'ja', label: '日本語' },
+  { value: 'ko', label: '한국어' },
+  { value: 'ru', label: 'Русский' },
+  { value: 'it', label: 'Italiano' }
+])
+
+const handleLocaleChange = () => {
+  // Emit an event to notify parent about locale change
+  emit('update:locale', currentLocale.value)
+}
 
 const isOpen = computed({
   get: () => props.modelValue,
@@ -468,7 +534,8 @@ const expandedSections = reactive({
   xAxis: false,
   yAxis: false,
   colors: false,
-  animation: false
+  animation: false,
+  language: false
 })
 
 // Check if chart has axis (for non-pie, non-radar charts)
@@ -972,7 +1039,7 @@ const colorPalette = computed({
     if (!localOptions.color || !Array.isArray(localOptions.color)) {
       return ['#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de', '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc']
     }
-    return localOptions.color.map(color => expandHexColor(color))
+    return localOptions.color.map((color: string) => expandHexColor(color))
   },
   set: (value) => {
     localOptions.color = value

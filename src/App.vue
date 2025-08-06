@@ -162,6 +162,7 @@
                 ref="previewChartRef"
                 :options="previewOptions"
                 :theme="currentTheme"
+                v-model:locale="chartLocale"
                 :key="previewKey"
                 :auto-resize="true"
                 @ready="handleChartReady"
@@ -360,6 +361,9 @@ const themeKey = ref(0)
 
 // Toast notifications
 const toast = useToast()
+
+// Chart locale
+const chartLocale = ref('en')
 
 // Sync app theme with chart theme
 watch(isDarkMode, (newValue) => {

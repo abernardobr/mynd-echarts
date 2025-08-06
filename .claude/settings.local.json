@@ -15,7 +15,13 @@
       "Bash(npm run preview:*)",
       "Bash(cp:*)",
       "Bash(curl:*)",
-      "Bash(pkill:*)"
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "Bash(vite build:*)",
+      "Bash(npx vite build:*)",
+      "Bash(for file in lib/locales/{zh-CN,es,fr,pt-BR}.ts)",
+      "Bash(do echo \"=== $file ===\")",
+      "Bash(done)"
     ],
     "deny": []
   }

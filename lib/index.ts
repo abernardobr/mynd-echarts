@@ -7,6 +7,7 @@ export { MyndEcharts, ToastContainer }
 // Re-export specific items to avoid conflicts
 export * from './types'
 export * from './composables'
+export * from './locales'
 export { debounce, throttle } from './utils'
 
 // Plugin install function

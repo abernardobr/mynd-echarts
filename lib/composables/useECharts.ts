@@ -5,6 +5,7 @@ import { debounce } from '../utils'
 
 export interface UseEChartsOptions {
   theme?: string | object | Ref<string | object> | ComputedRef<string | object>
+  locale?: string | Ref<string> | ComputedRef<string>
   renderer?: 'canvas' | 'svg'
   autoResize?: boolean
   resizeDebounce?: number
@@ -47,6 +48,7 @@ export function useECharts(
 ): UseEChartsReturn {
   const {
     theme = 'default',
+    locale = 'en',
     renderer = 'canvas',
     autoResize = true,
     resizeDebounce = 200,
@@ -61,12 +63,19 @@ export function useECharts(
   let resizeHandler: (() => void) | null = null
   let eventHandlers: Map<string, Function[]> = new Map()
   
-  // Create a computed ref for theme to handle both static and reactive values
+  // Create computed refs for theme and locale to handle both static and reactive values
   const currentTheme = computed(() => {
     if (isRef(theme)) {
       return unref(theme)
     }
     return theme
+  })
+  
+  const currentLocale = computed(() => {
+    if (isRef(locale)) {
+      return unref(locale)
+    }
+    return locale
   })
 
   const initChart = () => {
@@ -81,9 +90,10 @@ export function useECharts(
       chartInstance.value.dispose()
     }
 
-    // Initialize chart with merged options
+    // Initialize chart with merged options including locale
     chartInstance.value = echarts.init(el, currentTheme.value, {
       renderer,
+      locale: currentLocale.value,
       ...initOptions
     })
 

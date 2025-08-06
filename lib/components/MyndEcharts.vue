@@ -6,6 +6,7 @@
       v-model="showConfig" 
       :options="currentOptions"
       @update:options="handleConfigUpdate"
+      @update:locale="handleLocaleUpdate"
     />
   </div>
 </template>
@@ -14,6 +15,8 @@
 import { ref, computed, onMounted, onUnmounted, watch, watchEffect, nextTick, type CSSProperties } from 'vue'
 import type { EChartsOption, ECharts, EChartsType } from 'echarts'
 import { useECharts } from '../composables/useECharts'
+import { provideLocale } from '../composables/useLocale'
+import type { SupportedLocale } from '../locales/types'
 import ConfigDialog from './ConfigDialog.vue'
 
 export interface MyndEchartsProps {
@@ -25,6 +28,10 @@ export interface MyndEchartsProps {
    * Chart theme - can be a string name or custom theme object
    */
   theme?: string | object
+  /**
+   * Locale for chart UI elements (toolbox, etc.)
+   */
+  locale?: string
   /**
    * Show loading animation
    */
@@ -89,6 +96,7 @@ export interface MyndEchartsProps {
 
 const props = withDefaults(defineProps<MyndEchartsProps>(), {
   theme: 'default',
+  locale: 'en',
   loading: false,
   autoResize: true,
   renderer: 'canvas',
@@ -140,11 +148,22 @@ const emit = defineEmits<{
   rendered: [params: any]
   finished: [params: any]
   'update:options': [options: EChartsOption]
+  'update:locale': [locale: string]
 }>()
 
 const chartRef = ref<HTMLElement>()
 const showConfig = ref(false)
 const currentOptions = ref<EChartsOption>(props.options || {})
+
+// Provide locale context for child components
+const localeContext = provideLocale(props.locale as SupportedLocale)
+
+// Update locale when prop changes
+watch(() => props.locale, (newLocale) => {
+  if (newLocale) {
+    localeContext.setLocale(newLocale as SupportedLocale)
+  }
+})
 
 const computedStyle = computed<CSSProperties>(() => ({
   width: '100%',
@@ -176,6 +195,7 @@ const initOptionsWithDefaults = computed(() => ({
 
 const { chartInstance, setOption, resize, dispose, clear, getOption } = useECharts(chartRef, {
   theme: computed(() => props.theme),
+  locale: computed(() => props.locale),
   renderer: props.renderer,
   autoResize: props.autoResize,
   initOptions: initOptionsWithDefaults.value,
@@ -241,6 +261,10 @@ const handleConfigUpdate = (newOptions: EChartsOption) => {
     lazyUpdate: false
   })
   emit('update:options', newOptions)
+}
+
+const handleLocaleUpdate = (newLocale: string) => {
+  emit('update:locale', newLocale)
 }
 
 // Watch for option changes
