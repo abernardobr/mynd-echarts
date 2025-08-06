@@ -30,7 +30,10 @@
       "Bash(npm run test:*)",
       "Bash(npx vitest run:*)",
       "Bash(npx c8 report:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm pack:*)",
+      "Bash(npm whoami:*)",
+      "Bash(npm publish:*)"
     ],
     "deny": []
   }

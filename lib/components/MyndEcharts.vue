@@ -12,8 +12,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted, watch, watchEffect, nextTick, type CSSProperties } from 'vue'
-import type { EChartsOption, ECharts, EChartsType } from 'echarts'
+import { ref, computed, onMounted, onUnmounted, watch, watchEffect, type CSSProperties } from 'vue'
+import type { EChartsOption, ECharts } from 'echarts'
 import { useECharts } from '../composables/useECharts'
 import { provideLocale } from '../composables/useLocale'
 import type { SupportedLocale } from '../locales/types'
@@ -339,13 +339,13 @@ defineExpose({
   getHeight: () => chartInstance.value?.getHeight(),
   getDom: () => chartInstance.value?.getDom(),
   getDataURL: (opts?: {
-    type?: string
+    type?: 'png' | 'jpeg' | 'svg'
     pixelRatio?: number
     backgroundColor?: string
     excludeComponents?: string[]
   }) => chartInstance.value?.getDataURL(opts),
   getConnectedDataURL: (opts?: {
-    type?: string
+    type?: 'png' | 'jpeg' | 'svg'
     pixelRatio?: number
     backgroundColor?: string
     excludeComponents?: string[]

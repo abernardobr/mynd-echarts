@@ -4,8 +4,6 @@
  */
 
 import { ref, computed, watch, type Ref, type ComputedRef } from 'vue'
-import type { SeriesOption } from '../types'
-import { isNumericArray } from '../types'
 
 /**
  * Data point type
@@ -102,8 +100,7 @@ export function useChartData<T = any>(
     transformer,
     validator,
     cache = false,
-    maxDataPoints,
-    realtime = false
+    maxDataPoints
   } = config
 
   // State

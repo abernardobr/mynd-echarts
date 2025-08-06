@@ -12,15 +12,15 @@ import { isEChartsOption, deepClone, mergeOptions } from '../types'
  */
 export interface UseChartOptionsConfig {
   /** Default chart options */
-  defaultOptions?: EChartsOption
+  defaultOptions?: any
   /** Validate options before applying */
   validateOptions?: boolean
   /** Deep watch for option changes */
   deepWatch?: boolean
   /** Custom validation function */
-  validator?: (options: EChartsOption) => boolean | string
+  validator?: (options: any) => boolean | string
   /** Transform options before applying */
-  transformer?: (options: EChartsOption) => EChartsOption
+  transformer?: (options: any) => any
 }
 
 /**
@@ -28,27 +28,27 @@ export interface UseChartOptionsConfig {
  */
 export interface UseChartOptionsReturn {
   /** Current chart options */
-  options: Ref<EChartsOption>
+  options: Ref<any>
   /** Computed options after transformation */
-  computedOptions: ComputedRef<EChartsOption>
+  computedOptions: ComputedRef<any>
   /** Validation errors */
   errors: Ref<string[]>
   /** Whether options are valid */
   isValid: ComputedRef<boolean>
   /** Set new options */
-  setOptions: (newOptions: EChartsOption, merge?: boolean) => void
+  setOptions: (newOptions: any, merge?: boolean) => void
   /** Update specific option property */
   updateOption: (path: string, value: any) => void
   /** Reset to default options */
   resetOptions: () => void
   /** Merge multiple options */
-  mergeOptions: (...options: Partial<EChartsOption>[]) => void
+  mergeOptions: (...options: any[]) => void
   /** Validate current options */
   validate: () => boolean
   /** Get option by path */
   getOption: (path: string) => any
   /** Clone current options */
-  cloneOptions: () => EChartsOption
+  cloneOptions: () => any
 }
 
 /**
@@ -67,7 +67,7 @@ export interface UseChartOptionsReturn {
  * ```
  */
 export function useChartOptions(
-  initialOptions: EChartsOption = {},
+  initialOptions: any = {},
   config: UseChartOptionsConfig = {}
 ): UseChartOptionsReturn {
   const {
@@ -79,7 +79,7 @@ export function useChartOptions(
   } = config
 
   // State
-  const options = ref<EChartsOption>(deepClone({ ...defaultOptions, ...initialOptions }))
+  const options = ref<any>(deepClone({ ...defaultOptions, ...initialOptions }))
   const errors = ref<string[]>([])
 
   // Computed

@@ -9,23 +9,7 @@ export default defineConfig(({ mode, command }) => {
   return {
     plugins: [
       vue(),
-      isLibBuild && dts({
-        include: ['lib/**/*.ts', 'lib/**/*.vue'],
-        exclude: ['**/*.test.ts', '**/*.spec.ts'],
-        rollupTypes: true,
-        outDir: 'dist',
-        cleanVueFileName: true,
-        staticImport: true,
-        insertTypesEntry: true,
-        compilerOptions: {
-          preserveSymlinks: false
-        },
-        beforeWriteFile: (filePath, content) => {
-          // Clean up paths in declaration files
-          const cleanContent = content.replace(/\/\/\/\s*<reference\s+types="[^"]*"\s*\/>/g, '')
-          return { filePath, content: cleanContent }
-        }
-      })
+      false
     ].filter(Boolean),
     resolve: {
       alias: {

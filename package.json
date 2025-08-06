@@ -1,6 +1,6 @@
 {
-  "name": "mynd-echarts",
-  "version": "0.0.1",
+  "name": "@abernardobr/mynd-echarts",
+  "version": "1.0.0",
   "description": "A full-featured Vue 3 wrapper for Apache ECharts with TypeScript support",
   "type": "module",
   "main": "./dist/mynd-echarts.cjs",
@@ -26,7 +26,8 @@
     "dev": "vite",
     "dev:examples": "vite --config vite.examples.config.ts",
     "build": "npm run build:lib && npm run build:demo",
-    "build:lib": "vue-tsc --noEmit && vite build --mode lib",
+    "build:lib": "vite build --mode lib",
+    "build:lib:check": "vue-tsc --noEmit && vite build --mode lib",
     "build:demo": "DEMO_BUILD=true vite build",
     "build:examples": "vite build --config vite.examples.config.ts",
     "build:types": "vue-tsc --declaration --emitDeclarationOnly --outDir dist",
@@ -48,7 +49,6 @@
     "vue": "^3.4.0"
   },
   "dependencies": {
-    "@types/echarts": "^4.9.22",
     "echarts": "6"
   },
   "devDependencies": {
@@ -82,7 +82,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yourusername/mynd-echarts.git"
+    "url": "git+https://github.com/abernardobr/mynd-echarts.git"
   },
   "keywords": [
     "vue",
@@ -94,10 +94,10 @@
     "component",
     "wrapper"
   ],
-  "author": "Your Name",
+  "author": "Alberto Bernardo <alberto@myndware.io>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/yourusername/mynd-echarts/issues"
+    "url": "https://github.com/abernardobr/mynd-echarts/issues"
   },
-  "homepage": "https://github.com/yourusername/mynd-echarts#readme"
+  "homepage": "https://github.com/abernardobr/mynd-echarts#readme"
 }

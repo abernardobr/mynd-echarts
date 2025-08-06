@@ -1,4 +1,4 @@
-import { ref, watch, type Ref } from 'vue'
+import { ref } from 'vue'
 import * as echarts from 'echarts'
 
 export interface ChartTheme {

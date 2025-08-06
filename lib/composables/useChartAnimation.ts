@@ -1,14 +1,14 @@
-import { ref, watch, type Ref } from 'vue'
+import { ref, type Ref } from 'vue'
 import type { ECharts, EChartsOption } from 'echarts'
 
 export interface AnimationConfig {
   enabled?: boolean
   duration?: number
-  easing?: string
+  easing?: 'linear' | 'quadraticIn' | 'quadraticOut' | 'quadraticInOut' | 'cubicIn' | 'cubicOut' | 'cubicInOut' | 'quarticIn' | 'quarticOut' | 'quarticInOut' | 'quinticIn' | 'quinticOut' | 'quinticInOut' | 'sinusoidalIn' | 'sinusoidalOut' | 'sinusoidalInOut' | 'exponentialIn' | 'exponentialOut' | 'exponentialInOut' | 'circularIn' | 'circularOut' | 'circularInOut' | 'elasticIn' | 'elasticOut' | 'elasticInOut' | 'backIn' | 'backOut' | 'backInOut' | 'bounceIn' | 'bounceOut' | 'bounceInOut'
   delay?: number | ((idx: number) => number)
   update?: boolean
   updateDuration?: number
-  updateEasing?: string
+  updateEasing?: 'linear' | 'quadraticIn' | 'quadraticOut' | 'quadraticInOut' | 'cubicIn' | 'cubicOut' | 'cubicInOut' | 'quarticIn' | 'quarticOut' | 'quarticInOut' | 'quinticIn' | 'quinticOut' | 'quinticInOut' | 'sinusoidalIn' | 'sinusoidalOut' | 'sinusoidalInOut' | 'exponentialIn' | 'exponentialOut' | 'exponentialInOut' | 'circularIn' | 'circularOut' | 'circularInOut' | 'elasticIn' | 'elasticOut' | 'elasticInOut' | 'backIn' | 'backOut' | 'backInOut' | 'bounceIn' | 'bounceOut' | 'bounceInOut'
   updateDelay?: number | ((idx: number) => number)
 }
 
@@ -88,9 +88,7 @@ export function useChartAnimation(
   ) => {
     if (!chartInstance.value) return
 
-    const actualDuration = duration || transitionDuration
     const steps = 60 // 60fps
-    const stepDuration = actualDuration / steps
     let currentStep = 0
 
     isAnimating.value = true
@@ -118,7 +116,7 @@ export function useChartAnimation(
       // Simple interpolation for series data
       const interpolatedOption: EChartsOption = {
         ...toOption,
-        series: toOption.series?.map((toSeries: any, idx: number) => {
+        series: Array.isArray(toOption.series) ? toOption.series.map((toSeries: any, idx: number) => {
           const fromSeries = (fromOption.series as any[])?.[idx]
           if (!fromSeries) return toSeries
 
@@ -132,7 +130,7 @@ export function useChartAnimation(
               return toData
             })
           }
-        })
+        }) : toOption.series
       }
 
       chartInstance.value.setOption(interpolatedOption, true)

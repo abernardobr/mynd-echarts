@@ -167,7 +167,6 @@ export function generateColorPalette(baseColors: string[], count: number): strin
   }
   
   const palette: string[] = []
-  const steps = Math.ceil(count / baseColors.length)
   
   for (let i = 0; i < count; i++) {
     const baseIndex = i % baseColors.length
