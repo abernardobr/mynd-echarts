@@ -102,15 +102,27 @@ export default defineConfig(({ mode, command }) => {
       globals: true,
       coverage: {
         provider: 'v8',
-        reporter: ['text', 'json', 'html'],
+        reporter: ['text', 'json', 'html', 'lcov'],
+        include: ['lib/**/*.{ts,vue}'],
         exclude: [
           'node_modules/',
           'tests/',
           '**/*.d.ts',
+          '**/*.spec.ts',
+          '**/*.test.ts',
           'vite.config.ts',
           'vitest.config.ts',
-          'examples/**'
-        ]
+          'examples/**',
+          'lib/index.ts',
+          'lib/locales/index.ts',
+          'lib/types/index.ts'
+        ],
+        thresholds: {
+          lines: 90,
+          functions: 90,
+          branches: 85,
+          statements: 90
+        }
       }
     }
   }

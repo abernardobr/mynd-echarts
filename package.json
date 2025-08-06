@@ -38,7 +38,10 @@
     "format": "prettier --write .",
     "test": "vitest",
     "test:ui": "vitest --ui",
-    "test:coverage": "vitest --coverage",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:coverage:ui": "vitest --ui --coverage",
+    "test:watch": "vitest watch",
     "prepublishOnly": "npm run build:lib"
   },
   "peerDependencies": {

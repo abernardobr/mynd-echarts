@@ -1,31 +1,44 @@
 <template>
-  <label class="base-checkbox" :class="{ disabled }">
+  <label class="base-checkbox" :class="{ disabled }" :for="checkboxId">
     <input
+      :id="checkboxId"
       type="checkbox"
       :checked="modelValue"
       :disabled="disabled"
       @change="handleChange"
       class="checkbox-input"
+      v-bind="$attrs"
     />
     <div class="checkbox-box">
       <svg v-if="modelValue" class="checkbox-icon" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
       </svg>
     </div>
-    <span class="checkbox-label">{{ label }}</span>
+    <span v-if="label" class="checkbox-label">{{ label }}</span>
   </label>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
+defineOptions({
+  inheritAttrs: false
+})
+
 interface BaseCheckboxProps {
   modelValue: boolean
-  label: string
+  label?: string
   disabled?: boolean
+  id?: string
 }
 
 const props = withDefaults(defineProps<BaseCheckboxProps>(), {
+  label: '',
   disabled: false
 })
+
+// Generate unique ID if not provided
+const checkboxId = computed(() => props.id || `checkbox-${Math.random().toString(36).substring(2, 9)}`)
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]

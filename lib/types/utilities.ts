@@ -211,16 +211,19 @@ function adjustColorOpacity(color: string, opacity: number): string {
  * @returns Formatted string
  */
 export function formatNumber(num: number, decimals: number = 1): string {
-  if (num >= 1e9) {
-    return (num / 1e9).toFixed(decimals) + 'B'
+  const abs = Math.abs(num)
+  const sign = num < 0 ? '-' : ''
+  
+  if (abs >= 1e9) {
+    return sign + (abs / 1e9).toFixed(decimals) + 'B'
   }
-  if (num >= 1e6) {
-    return (num / 1e6).toFixed(decimals) + 'M'
+  if (abs >= 1e6) {
+    return sign + (abs / 1e6).toFixed(decimals) + 'M'
   }
-  if (num >= 1e3) {
-    return (num / 1e3).toFixed(decimals) + 'K'
+  if (abs >= 1e3) {
+    return sign + (abs / 1e3).toFixed(decimals) + 'K'
   }
-  return num.toFixed(decimals)
+  return sign + abs.toFixed(decimals)
 }
 
 /**

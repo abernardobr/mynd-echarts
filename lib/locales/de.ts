@@ -4,7 +4,7 @@ export const de: LocaleMessages = {
   configDialog: {
     title: 'Diagrammkonfiguration',
     sections: {
-      title: 'Titel',
+      title: 'Titel & Untertitel',
       legend: 'Legende',
       tooltip: 'Tooltip',
       toolbox: 'Werkzeugkasten',
@@ -16,40 +16,77 @@ export const de: LocaleMessages = {
       language: 'Sprache / Language / 语言'
     },
     fields: {
+      // Title section
       titleText: 'Titeltext',
       subtitle: 'Untertitel',
       position: 'Position',
       textStyleColor: 'Textstilfarbe',
       fontSize: 'Schriftgröße',
+      
+      // Legend section
       showLegend: 'Legende anzeigen',
       orientation: 'Ausrichtung',
+      
+      // Tooltip section
       showTooltip: 'Tooltip anzeigen',
       trigger: 'Auslöser',
       formatter: 'Formatierung',
+      formatterHelp: 'Platzhalter verwenden: {a} Serienname, {b} Datenname, {c} Datenwert, {d} Prozentsatz. Beispiel: \'{b}: {c} ({d}%)\'',
+      
+      // Toolbox section
       showToolbox: 'Werkzeugkasten anzeigen',
       iconSize: 'Symbolgröße',
       itemGap: 'Elementabstand',
       showTitleOnHover: 'Titel beim Überfahren anzeigen',
       features: 'Funktionen',
-      enable: 'Aktivieren',
+      
+      // Toolbox features
+      saveAsImage: 'Als Bild speichern',
+      saveAsImageEnable: 'Aktivieren',
       imageType: 'Bildtyp',
       filename: 'Dateiname',
+      restore: 'Wiederherstellen',
+      restoreEnable: 'Aktivieren',
+      dataView: 'Datenansicht',
+      dataViewEnable: 'Aktivieren',
       readOnly: 'Schreibgeschützt',
+      dataZoom: 'Datenzoom',
+      dataZoomEnable: 'Aktivieren',
+      magicType: 'Diagrammtyp wechseln',
+      magicTypeEnable: 'Aktivieren',
+      lineChart: 'Liniendiagramm',
+      barChart: 'Balkendiagramm',
+      stack: 'Stapel',
+      tiled: 'Gekachelt',
+      
+      // Grid section
       leftMargin: 'Linker Rand',
       rightMargin: 'Rechter Rand',
       topMargin: 'Oberer Rand',
       bottomMargin: 'Unterer Rand',
       containLabel: 'Beschriftung enthalten',
+      
+      // Axis sections
       name: 'Name',
       type: 'Typ',
       showAxisLine: 'Achsenlinie anzeigen',
       showSplitLine: 'Trennlinie anzeigen',
+      
+      // Colors section
       colorPalette: 'Farbpalette',
       backgroundColor: 'Hintergrundfarbe',
+      addColor: 'Farbe hinzufügen',
+      
+      // Animation section
       enableAnimation: 'Animation aktivieren',
       animationDuration: 'Animationsdauer (ms)',
       animationEasing: 'Animations-Easing',
-      selectLanguage: 'Sprache auswählen'
+      
+      // Language section
+      selectLanguage: 'Sprache auswählen',
+      
+      // General
+      enable: 'Aktivieren'
     },
     positions: {
       left: 'Links',
@@ -74,12 +111,6 @@ export const de: LocaleMessages = {
       time: 'Zeit',
       log: 'Logarithmisch'
     },
-    chartTypes: {
-      line: 'Liniendiagramm',
-      bar: 'Balkendiagramm',
-      stack: 'Stapel',
-      tiled: 'Gekachelt'
-    },
     easingTypes: {
       linear: 'Linear',
       cubicIn: 'Kubisch Ein',
@@ -88,12 +119,24 @@ export const de: LocaleMessages = {
       elasticOut: 'Elastisch Aus',
       bounceOut: 'Sprung Aus'
     },
+    buttons: {
+      reset: 'Zurücksetzen',
+      apply: 'Anwenden',
+      close: 'Schließen',
+      addColor: 'Farbe hinzufügen'
+    },
+    chartTypes: {
+      line: 'Liniendiagramm',
+      bar: 'Balkendiagramm',
+      stack: 'Stapel',
+      tiled: 'Gekachelt'
+    },
     features: {
       saveAsImage: 'Als Bild speichern',
       restore: 'Wiederherstellen',
       dataView: 'Datenansicht',
       dataZoom: 'Datenzoom',
-      magicType: 'Magischer Typ (Diagrammwechsler)'
+      magicType: 'Diagrammtyp wechseln'
     },
     placeholders: {
       chartTitle: 'Diagrammtitel',
@@ -108,12 +151,10 @@ export const de: LocaleMessages = {
     helpTexts: {
       formatter: 'Platzhalter verwenden: {a} Serienname, {b} Datenname, {c} Datenwert, {d} Prozentsatz. Beispiel: \'{b}: {c} ({d}%)\'',
       languageChange: 'Ändert die Sprache für alle UI-Elemente in der Diagrammkonfiguration'
-    },
-    buttons: {
-      close: 'Schließen',
-      reset: 'Zurücksetzen',
-      apply: 'Anwenden',
-      addColor: 'Farbe hinzufügen'
     }
+  },
+  chart: {
+    loading: 'Laden...',
+    noData: 'Keine Daten'
   }
 }

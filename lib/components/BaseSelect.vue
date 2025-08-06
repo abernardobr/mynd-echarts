@@ -1,13 +1,15 @@
 <template>
   <div class="base-select">
-    <label v-if="label" class="select-label">{{ label }}</label>
+    <label v-if="label" class="select-label" :for="selectId">{{ label }}</label>
     <div class="select-wrapper">
       <select
+        :id="selectId"
         :value="modelValue"
         :disabled="disabled"
         @change="handleChange"
         class="select-field"
         :class="selectClass"
+        v-bind="$attrs"
       >
         <option v-if="placeholder" value="" disabled>{{ placeholder }}</option>
         <option
@@ -29,6 +31,12 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
+
+defineOptions({
+  inheritAttrs: false
+})
+
 type OptionType = string | number | { label: string; value: string | number }
 
 interface BaseSelectProps {
@@ -39,11 +47,15 @@ interface BaseSelectProps {
   disabled?: boolean
   helpText?: string
   selectClass?: string | string[] | Record<string, boolean>
+  id?: string
 }
 
 const props = withDefaults(defineProps<BaseSelectProps>(), {
   disabled: false
 })
+
+// Generate unique ID if not provided
+const selectId = computed(() => props.id || `select-${Math.random().toString(36).substring(2, 9)}`)
 
 const emit = defineEmits<{
   'update:modelValue': [value: string | number]

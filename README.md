@@ -273,6 +273,50 @@ const handleLegendChange = (params) => {
 </script>
 ```
 
+## 🧪 Testing
+
+### Test Coverage (as of August 6, 2025)
+
+| Category | Coverage | Status |
+|----------|----------|---------|
+| **Statements** | 85.02% | ✅ |
+| **Branches** | 87.38% | ✅ |
+| **Functions** | 43.54% | ⚠️ |
+| **Lines** | 85.02% | ✅ |
+
+#### Detailed Coverage by Module
+
+| Module | Coverage | Description |
+|--------|----------|-------------|
+| **Composables** | 95.64% | Core logic and hooks |
+| **Utilities** | 100% | Helper functions |
+| **Type Guards** | 82.29% | Type checking utilities |
+| **Locales** | 100% | Internationalization |
+| **Components** | 69.33% | Vue components |
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run specific test file
+npm test tests/unit/composables/useECharts.spec.ts
+
+# Watch mode
+npm run test:watch
+```
+
+### Test Stack
+
+- **Framework**: Vitest
+- **Component Testing**: @vue/test-utils
+- **Coverage**: c8
+- **Assertions**: Built-in Vitest assertions
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please read our contributing guidelines before submitting PRs.

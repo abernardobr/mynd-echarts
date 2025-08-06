@@ -1,12 +1,13 @@
 <template>
   <div class="base-input" :class="{ 'has-icon': $slots.icon }">
-    <label v-if="label" class="input-label">{{ label }}</label>
+    <label v-if="label" class="input-label" :for="inputId">{{ label }}</label>
     <div class="input-wrapper">
       <div v-if="$slots.icon" class="input-icon">
         <slot name="icon"></slot>
       </div>
       <input
         v-if="type !== 'textarea'"
+        :id="inputId"
         :type="type"
         :value="modelValue"
         :placeholder="placeholder"
@@ -24,6 +25,7 @@
       />
       <textarea
         v-else
+        :id="inputId"
         :value="modelValue"
         :placeholder="placeholder"
         :disabled="disabled"
@@ -60,6 +62,7 @@ interface BaseInputProps {
   step?: number | string
   rows?: number
   inputClass?: string | string[] | Record<string, boolean>
+  id?: string
 }
 
 const props = withDefaults(defineProps<BaseInputProps>(), {
@@ -68,6 +71,9 @@ const props = withDefaults(defineProps<BaseInputProps>(), {
   readonly: false,
   rows: 3
 })
+
+// Generate unique ID if not provided
+const inputId = computed(() => props.id || `input-${Math.random().toString(36).substring(2, 9)}`)
 
 const emit = defineEmits<{
   'update:modelValue': [value: string | number]

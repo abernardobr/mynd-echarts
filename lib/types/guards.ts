@@ -114,7 +114,7 @@ export function isValidRenderer(value: any): value is 'canvas' | 'svg' {
  * @returns True if value is a string or object
  */
 export function isValidTheme(value: any): value is string | object {
-  return typeof value === 'string' || (value && typeof value === 'object')
+  return typeof value === 'string' || (value && typeof value === 'object' && !Array.isArray(value))
 }
 
 /**
